@@ -1,17 +1,16 @@
 // src/pages/InductionPanel.jsx
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   generateInduction, simulateInduction, populateDatabase,
-  resetDatabase, uploadBranding, supervisorUpdate
+  resetDatabase, supervisorUpdate
 } from '../api/api'
 import { Badge, StatusDot, Spinner, EmptyState } from '../components/ui/index'
 import {
-  Play, Zap, Database, Trash2, Upload,
+  Play, Zap, Database, Trash2,
   AlertTriangle, ChevronDown, ChevronUp, Info
 } from 'lucide-react'
 
-// ─── Sub-components ───────────────────────────────────────
-
+// ─── Traffic Selector ─────────────────────────────────────
 function TrafficSelector({ value, onChange }) {
   const levels = [
     { v: 1, label: 'L1', desc: 'Very Low' },
@@ -40,15 +39,13 @@ function TrafficSelector({ value, onChange }) {
   )
 }
 
+// ─── Train Row ────────────────────────────────────────────
 function TrainRow({ train, type }) {
   const [expanded, setExpanded] = useState(false)
   const color = type === 'service' ? 'green' : type === 'standby' ? 'yellow' : 'red'
   return (
     <>
-      <tr
-        className="cursor-pointer group"
-        onClick={() => setExpanded(e => !e)}
-      >
+      <tr className="cursor-pointer" onClick={() => setExpanded(e => !e)}>
         <td>
           <div className="flex items-center gap-2">
             <StatusDot color={color} pulse={type === 'service'} />
@@ -69,9 +66,7 @@ function TrainRow({ train, type }) {
         </td>
         <td>
           {type !== 'maintenance' ? (
-            <span className="font-mono text-xs text-depot-muted">
-              T{train.track} · P{train.position}
-            </span>
+            <span className="font-mono text-xs text-depot-muted">T{train.track} · P{train.position}</span>
           ) : (
             <span className="font-mono text-xs text-depot-muted">IBL</span>
           )}
@@ -83,9 +78,7 @@ function TrainRow({ train, type }) {
             <span className="text-depot-muted">—</span>
           )}
         </td>
-        <td>
-          {train.forced && <Badge variant="forced">Forced</Badge>}
-        </td>
+        <td>{train.forced && <Badge variant="forced">Forced</Badge>}</td>
         <td>
           <button className="text-depot-muted hover:text-depot-accent transition-colors">
             {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
@@ -114,17 +107,16 @@ function TrainRow({ train, type }) {
   )
 }
 
-function Panel({ title, variant, trains, columns }) {
+// ─── Panel ────────────────────────────────────────────────
+function Panel({ title, variant, trains }) {
   const colors = {
     service:     { border: '#00e676', bg: 'rgba(0,230,118,0.04)',  label: 'text-depot-green',  dot: 'green' },
     standby:     { border: '#ffd740', bg: 'rgba(255,215,64,0.04)', label: 'text-depot-yellow', dot: 'yellow' },
     maintenance: { border: '#ff1744', bg: 'rgba(255,23,68,0.04)',  label: 'text-depot-red',    dot: 'red' },
   }
   const s = colors[variant]
-
   return (
     <div className="panel flex flex-col" style={{ borderColor: s.border, background: s.bg }}>
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-depot-border">
         <div className="flex items-center gap-2">
           <StatusDot color={s.dot} pulse={variant === 'service'} />
@@ -134,8 +126,6 @@ function Panel({ title, variant, trains, columns }) {
         </div>
         <span className="font-mono text-xs text-depot-muted">{trains.length} units</span>
       </div>
-
-      {/* Table */}
       <div className="flex-1 overflow-auto">
         {trains.length === 0 ? (
           <EmptyState message="No trains assigned" sub="Run induction to populate" />
@@ -163,7 +153,8 @@ function Panel({ title, variant, trains, columns }) {
   )
 }
 
-function OverrideForm({ onSuccess }) {
+// ─── Override Modal ───────────────────────────────────────
+function OverrideModal({ onClose }) {
   const [trainName, setTrainName] = useState('')
   const [status, setStatus] = useState('standby')
   const [loading, setLoading] = useState(false)
@@ -177,7 +168,6 @@ function OverrideForm({ onSuccess }) {
       await supervisorUpdate({ train_name: trainName.trim(), override_status: status })
       setMsg({ ok: true, text: `Override applied to ${trainName}` })
       setTrainName('')
-      if (onSuccess) onSuccess()
     } catch (e) {
       setMsg({ ok: false, text: e.message })
     }
@@ -185,65 +175,83 @@ function OverrideForm({ onSuccess }) {
   }
 
   return (
-    <div className="panel p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <AlertTriangle size={13} className="text-depot-yellow" />
-        <span className="font-display font-bold text-xs tracking-widest text-depot-yellow uppercase">
-          Supervisor Override
-        </span>
-      </div>
-
-      <div className="space-y-3">
-        <div>
-          <label className="section-label mb-1 block">Train ID</label>
-          <input
-            type="text"
-            value={trainName}
-            onChange={e => setTrainName(e.target.value)}
-            placeholder="e.g. T-5"
-            className="w-full bg-depot-bg border border-depot-border rounded-sm px-3 py-2 font-mono text-xs text-depot-white placeholder-depot-muted focus:outline-none focus:border-depot-accent"
-          />
-        </div>
-
-        <div>
-          <label className="section-label mb-1 block">Override Status</label>
-          <div className="flex gap-2">
-            {['standby', 'maintenance'].map(s => (
-              <button
-                key={s}
-                onClick={() => setStatus(s)}
-                className={`flex-1 btn text-xs ${
-                  status === s
-                    ? s === 'standby' ? 'btn-warning' : 'btn-danger'
-                    : 'btn-ghost'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}
+      onClick={onClose}
+    >
+      <div
+        className="panel p-6 w-full max-w-sm mx-4"
+        style={{ borderColor: '#ffd740', boxShadow: '0 0 40px rgba(255,215,64,0.15)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={15} className="text-depot-yellow" />
+            <span className="font-display font-bold text-sm tracking-widest text-depot-yellow uppercase">
+              Supervisor Override
+            </span>
           </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-sm border border-depot-border hover:border-depot-accent transition-colors text-depot-muted hover:text-depot-accent"
+          >
+            ✕
+          </button>
         </div>
 
-        <button
-          onClick={submit}
-          disabled={loading || !trainName.trim()}
-          className="w-full btn btn-warning flex items-center justify-center gap-2"
-        >
-          {loading ? <Spinner size={12} /> : <AlertTriangle size={12} />}
-          Apply Override
-        </button>
+        <div className="space-y-4">
+          <div>
+            <label className="section-label mb-1.5 block">Train ID</label>
+            <input
+              type="text"
+              value={trainName}
+              onChange={e => setTrainName(e.target.value)}
+              placeholder="e.g. T-5"
+              autoFocus
+              className="w-full bg-depot-bg border border-depot-border rounded-sm px-3 py-2.5 font-mono text-sm focus:outline-none focus:border-depot-accent transition-colors"
+              style={{ color: 'var(--depot-text)' }}
+            />
+          </div>
 
-        {msg && (
-          <p className={`font-mono text-xs ${msg.ok ? 'text-depot-green' : 'text-depot-red'}`}>
-            {msg.ok ? '✓' : '✗'} {msg.text}
+          <div>
+            <label className="section-label mb-1.5 block">Override Status</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setStatus('standby')}
+                className={`flex-1 btn ${status === 'standby' ? 'btn-warning' : 'btn-ghost'}`}
+              >
+                Standby
+              </button>
+              <button
+                onClick={() => setStatus('maintenance')}
+                className={`flex-1 btn ${status === 'maintenance' ? 'btn-danger' : 'btn-ghost'}`}
+              >
+                Maintenance
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={submit}
+            disabled={loading || !trainName.trim()}
+            className="w-full btn btn-warning flex items-center justify-center gap-2"
+          >
+            {loading ? <Spinner size={13} /> : <AlertTriangle size={13} />}
+            Apply Override
+          </button>
+
+          {msg && (
+            <p className={`font-mono text-xs text-center ${msg.ok ? 'text-depot-green' : 'text-depot-red'}`}>
+              {msg.ok ? '✓' : '✗'} {msg.text}
+            </p>
+          )}
+
+          <p className="font-body text-depot-muted text-xs text-center leading-relaxed border-t border-depot-border pt-3">
+            Override auto-clears after next induction run.
           </p>
-        )}
-      </div>
-
-      <div className="mt-4 pt-3 border-t border-depot-border">
-        <p className="font-body text-depot-muted text-xs leading-relaxed">
-          Override is applied before next induction run and auto-clears after execution.
-        </p>
+        </div>
       </div>
     </div>
   )
@@ -251,13 +259,13 @@ function OverrideForm({ onSuccess }) {
 
 // ─── Main Page ────────────────────────────────────────────
 export default function InductionPanel() {
-  const [traffic, setTraffic] = useState(3)
-  const [result, setResult] = useState(null)
-  const [simResult, setSimResult] = useState(null)
-  const [loading, setLoading] = useState('')
-  const [toast, setToast] = useState(null)
-  const [simMode, setSimMode] = useState(false)
-  const fileRef = useRef()
+  const [traffic, setTraffic]       = useState(3)
+  const [result, setResult]         = useState(null)
+  const [simResult, setSimResult]   = useState(null)
+  const [loading, setLoading]       = useState('')
+  const [toast, setToast]           = useState(null)
+  const [simMode, setSimMode]       = useState(false)
+  const [showOverride, setShowOverride] = useState(false)
 
   const showToast = (msg, ok = true) => {
     setToast({ msg, ok })
@@ -267,8 +275,7 @@ export default function InductionPanel() {
   const run = async (fn, key, ...args) => {
     setLoading(key)
     try {
-      const res = await fn(...args)
-      return res
+      return await fn(...args)
     } catch (e) {
       showToast(e.message, false)
       return null
@@ -298,21 +305,13 @@ export default function InductionPanel() {
     if (res) { setResult(null); setSimResult(null); showToast('Database reset') }
   }
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const res = await run(uploadBranding, 'upload', file)
-    if (res) showToast(`Branding CSV: ${res.updated_trains} trains updated`)
-    e.target.value = ''
-  }
-
   const display = simMode ? simResult : result
 
   return (
     <div className="relative">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-16 right-4 z-50 px-4 py-2.5 rounded-sm border font-mono text-xs shadow-lg transition-all ${
+        <div className={`fixed top-16 right-4 z-50 px-4 py-2.5 rounded-sm border font-mono text-xs shadow-lg ${
           toast.ok
             ? 'bg-depot-panel border-depot-green text-depot-green'
             : 'bg-depot-panel border-depot-red text-depot-red'
@@ -321,10 +320,12 @@ export default function InductionPanel() {
         </div>
       )}
 
+      {/* Override Modal */}
+      {showOverride && <OverrideModal onClose={() => setShowOverride(false)} />}
+
       {/* ── Top Controls ── */}
       <div className="panel p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
-          {/* Traffic selector */}
           <div className="flex items-center gap-2">
             <span className="section-label whitespace-nowrap">Traffic Level</span>
             <TrafficSelector value={traffic} onChange={setTraffic} />
@@ -332,60 +333,32 @@ export default function InductionPanel() {
 
           <div className="h-6 w-px bg-depot-border mx-1" />
 
-          {/* Action buttons */}
-          <button
-            onClick={handleGenerate}
-            disabled={!!loading}
-            className="btn btn-primary"
-          >
+          <button onClick={handleGenerate} disabled={!!loading} className="btn btn-primary">
             {loading === 'generate' ? <Spinner size={12} /> : <Play size={12} />}
             Generate Induction
           </button>
 
-          <button
-            onClick={handleSimulate}
-            disabled={!!loading}
-            className="btn btn-ghost"
-          >
+          <button onClick={handleSimulate} disabled={!!loading} className="btn btn-ghost">
             {loading === 'simulate' ? <Spinner size={12} /> : <Zap size={12} />}
             Simulate
           </button>
 
           <div className="h-6 w-px bg-depot-border mx-1" />
 
-          <button
-            onClick={handlePopulate}
-            disabled={!!loading}
-            className="btn btn-ghost"
-          >
+          <button onClick={handlePopulate} disabled={!!loading} className="btn btn-ghost">
             {loading === 'populate' ? <Spinner size={12} /> : <Database size={12} />}
             Populate Sample Data
           </button>
 
-          <button
-            onClick={handleReset}
-            disabled={!!loading}
-            className="btn btn-danger"
-          >
+          <button onClick={handleReset} disabled={!!loading} className="btn btn-danger">
             {loading === 'reset' ? <Spinner size={12} /> : <Trash2 size={12} />}
             Reset DB
           </button>
 
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={!!loading}
-            className="btn btn-ghost"
-          >
-            {loading === 'upload' ? <Spinner size={12} /> : <Upload size={12} />}
-            Upload Branding CSV
+          <button onClick={() => setShowOverride(true)} className="btn btn-warning">
+            <AlertTriangle size={12} />
+            Supervisor Override
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleUpload}
-          />
         </div>
 
         {simMode && (
@@ -404,19 +377,11 @@ export default function InductionPanel() {
         )}
       </div>
 
-      {/* ── Main 3-col + sidebar ── */}
-      <div className="flex gap-4">
-        {/* 3 panels */}
-        <div className="flex-1 grid grid-cols-3 gap-4 min-w-0">
-          <Panel title="Service" variant="service"     trains={display?.service     ?? []} />
-          <Panel title="Standby" variant="standby"     trains={display?.standby     ?? []} />
-          <Panel title="Maintenance" variant="maintenance" trains={display?.maintenance ?? []} />
-        </div>
-
-        {/* Override sidebar */}
-        <div className="w-52 flex-shrink-0">
-          <OverrideForm />
-        </div>
+      {/* ── 3 Panels full width ── */}
+      <div className="grid grid-cols-3 gap-4">
+        <Panel title="Service"     variant="service"      trains={display?.service     ?? []} />
+        <Panel title="Standby"     variant="standby"      trains={display?.standby     ?? []} />
+        <Panel title="Maintenance" variant="maintenance"  trains={display?.maintenance ?? []} />
       </div>
     </div>
   )

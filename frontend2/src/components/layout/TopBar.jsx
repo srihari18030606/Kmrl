@@ -33,7 +33,7 @@ export default function TopBar() {
 
   return (
     <header
-      className="fixed top-0 left-56 right-0 h-14 flex items-center justify-between px-6 z-30 transition-colors duration-200"
+      className="fixed top-0 left-64 right-0 h-14 flex items-center justify-between px-6 z-30 transition-colors duration-200"
       style={{
         background: 'var(--depot-panel)',
         borderBottom: '1px solid var(--depot-border)',

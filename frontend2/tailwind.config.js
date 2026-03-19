@@ -39,10 +39,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono:    ["'Share Tech Mono'", "monospace"],
-        display: ["'Barlow Condensed'", "sans-serif"],
-        body:    ["'Barlow'", "sans-serif"],
-      },
+  mono:    ["'Roboto Mono'", "monospace"],
+  display: ["'Roboto Condensed'", "sans-serif"],
+  body:    ["'Roboto'", "sans-serif"],
+},
       colors: {
         depot: {
           bg:     'var(--depot-bg)',

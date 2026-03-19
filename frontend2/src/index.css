@@ -22,20 +22,20 @@
 
 /* ── LIGHT THEME ── */
 [data-theme="light"] {
-  --depot-bg:      #f0f4f8;
+  --depot-bg:      #f1f5f9;
   --depot-panel:   #ffffff;
   --depot-card:    #f8fafc;
-  --depot-border:  #cbd5e1;
-  --depot-dim:     #e2e8f0;
+  --depot-border:  #e2e8f0;
+  --depot-dim:     #e8edf5;
   --depot-accent:  #0284c7;
   --depot-green:   #16a34a;
-  --depot-yellow:  #d97706;
+  --depot-yellow:  #b45309;
   --depot-red:     #dc2626;
   --depot-orange:  #ea580c;
-  --depot-text:    #1e293b;
+  --depot-text:    #0f172a;
   --depot-muted:   #64748b;
   --depot-white:   #0f172a;
-  --shadow:        rgba(0,0,0,0.1);
+  --shadow:        rgba(0,0,0,0.08);
 }
 
 * {
@@ -48,7 +48,7 @@ html, body, #root {
   height: 100%;
   background-color: var(--depot-bg);
   color: var(--depot-text);
-  font-family: 'Barlow', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -74,7 +74,7 @@ html, body, #root {
 
 /* Section label */
 .section-label {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -147,7 +147,7 @@ html, body, #root {
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
