@@ -119,7 +119,7 @@ def evaluate_trains(trains, traffic_level=3):
 # ---------------------------
 
     BASE_FLEET = 25
-    BASE_CLEANING_BAYS = 5
+    BASE_CLEANING_BAYS = 3
 
     fleet_size = len(eligible)
     effective_bays = max(1, round(BASE_CLEANING_BAYS * (fleet_size / BASE_FLEET)))
@@ -132,11 +132,11 @@ def evaluate_trains(trains, traffic_level=3):
     for train in eligible:
         d = train.days_since_cleaning
 
-        if d >= 9:
+        if d >= 14:
             critical.append(train)
-        elif d >= 6:
+        elif d >= 10:
             dirty.append(train)
-        elif d >= 3:
+        elif d >= 5:
             mild.append(train)
         else:
             clean.append(train)
@@ -158,11 +158,11 @@ def evaluate_trains(trains, traffic_level=3):
         dirty_ratio = dirty_count / total_count
 
         if dirty_ratio >= 0.6:
-            hygiene_pressure = 1.5
-        elif dirty_ratio >= 0.4:
             hygiene_pressure = 1.3
+        elif dirty_ratio >= 0.4:
+            hygiene_pressure = 1.15
         elif dirty_ratio >= 0.2:
-            hygiene_pressure = 1.1
+            hygiene_pressure = 1.05
         else:
             hygiene_pressure = 1
 
@@ -199,11 +199,11 @@ def evaluate_trains(trains, traffic_level=3):
         if train.name in cleaning_names:
             
                 d = train.days_since_cleaning
-                if d >= 9:
+                if d >= 14:
                     level = "critical"
-                elif d >= 6:
+                elif d >= 10:
                     level = "dirty"
-                elif d >= 3:
+                elif d >= 5:
                     level = "mild"
                 else:
                     level = "routine"
@@ -385,11 +385,11 @@ def evaluate_trains(trains, traffic_level=3):
 
         d = train.days_since_cleaning
 
-        if d >= 9:
+        if d >= 14:
             cleanliness_penalty = 0.25
-        elif d >= 6:
+        elif d >= 10:
             cleanliness_penalty = 0.15
-        elif d >= 3:
+        elif d >= 5:
             cleanliness_penalty = 0.05
         else:
             cleanliness_penalty = 0
@@ -499,8 +499,6 @@ def evaluate_trains(trains, traffic_level=3):
         if original.is_branded:
             original.exposure_achieved += traffic_exposure_weight
 
-        if original.contract_days_remaining is not None:
-            original.contract_days_remaining -= 1
 
     # STEP 6: DEPOT GEOMETRY PARKING
     # ---------------------------
