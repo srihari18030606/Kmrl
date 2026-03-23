@@ -7,14 +7,14 @@ import { RefreshCw, Droplets } from 'lucide-react'
 function HygieneBar({ days }) {
   const pct = Math.min((days / 10) * 100, 100)
   const color =
-    days >= 9 ? '#ff1744' :
-    days >= 6 ? '#ff6d00' :
-    days >= 3 ? '#ffd740' : '#00e676'
+    days >= 14 ? '#ff1744' :
+    days >= 10 ? '#ff6d00' :
+    days >= 6 ? '#ffd740' : '#00e676'
 
   const label =
-    days >= 9 ? 'CRITICAL' :
-    days >= 6 ? 'DIRTY' :
-    days >= 3 ? 'MILD' : 'CLEAN'
+    days >= 14 ? 'CRITICAL' :
+    days >= 10 ? 'DIRTY' :
+    days >= 6 ? 'MILD' : 'CLEAN'
 
   return (
     <div className="flex items-center gap-2">
@@ -73,20 +73,20 @@ export default function CleaningManagement() {
   )
 
   // Stats
-  const critical = trains.filter(t => t.days_since_cleaning >= 9).length
-  const dirty    = trains.filter(t => t.days_since_cleaning >= 6 && t.days_since_cleaning < 9).length
-  const mild     = trains.filter(t => t.days_since_cleaning >= 3 && t.days_since_cleaning < 6).length
-  const clean    = trains.filter(t => t.days_since_cleaning < 3).length
+  const critical = trains.filter(t => t.days_since_cleaning >= 14).length
+  const dirty    = trains.filter(t => t.days_since_cleaning >= 10 && t.days_since_cleaning < 14).length
+  const mild     = trains.filter(t => t.days_since_cleaning >= 6 && t.days_since_cleaning < 10).length
+  const clean    = trains.filter(t => t.days_since_cleaning < 6).length
 
   return (
     <div>
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-3 mb-4">
         {[
-          { label: 'Critical (≥9d)', val: critical, color: '#ff1744' },
-          { label: 'Dirty (6–9d)',   val: dirty,    color: '#ff6d00' },
-          { label: 'Mild (3–6d)',    val: mild,     color: '#ffd740' },
-          { label: 'Clean (<3d)',    val: clean,    color: '#00e676' },
+          { label: 'Critical (≥14d)', val: critical, color: '#ff1744' },
+          { label: 'Dirty (10–14d)',   val: dirty,    color: '#ff6d00' },
+          { label: 'Mild (6–10d)',    val: mild,     color: '#ffd740' },
+          { label: 'Clean (<6d)',    val: clean,    color: '#00e676' },
         ].map(s => (
           <div key={s.label} className="panel p-3 border" style={{ borderColor: `${s.color}33` }}>
             <div className="font-mono text-2xl font-bold" style={{ color: s.color }}>{s.val}</div>
@@ -144,16 +144,16 @@ export default function CleaningManagement() {
                   const scheduled = cleaningPlan.includes(t.name)
                   const d = t.days_since_cleaning
                   const hygiene =
-                    d >= 9 ? { label: 'CRITICAL', color: '#ff1744' } :
-                    d >= 6 ? { label: 'DIRTY',    color: '#ff6d00' } :
-                    d >= 3 ? { label: 'MILD',     color: '#ffd740' } :
+                    d >= 14 ? { label: 'CRITICAL', color: '#ff1744' } :
+                    d >= 10 ? { label: 'DIRTY',    color: '#ff6d00' } :
+                    d >= 6 ? { label: 'MILD',     color: '#ffd740' } :
                              { label: 'CLEAN',    color: '#00e676' }
                   return (
                     <tr key={t.id}>
                       <td>
                         <div className="flex items-center gap-2">
                           <StatusDot
-                            color={d >= 9 ? 'red' : d >= 6 ? 'red' : d >= 3 ? 'yellow' : 'green'}
+                            color={d >= 14 ? 'red' : d >= 10 ? 'red' : d >= 6 ? 'yellow' : 'green'}
                             pulse={d >= 6}
                           />
                           <span className="font-mono font-bold text-depot-white">{t.name}</span>

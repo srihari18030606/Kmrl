@@ -40,7 +40,7 @@ function TrackLoadGrid({ layout }) {
     { key: 'track1', label: 'Track 1', cap: 5, type: 'Service' },
     { key: 'track2', label: 'Track 2', cap: 5, type: 'Service' },
     { key: 'track3', label: 'Track 3', cap: 5, type: 'Standby' },
-    { key: 'track4', label: 'Track 4', cap: 5, type: 'Standby' },
+    { key: 'track4', label: 'Track 4', cap: 10, type: 'Standby' },
     { key: 'inspection', label: 'IBL',  cap: 10, type: 'Maintenance' },
   ]
   const typeColors = {

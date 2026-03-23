@@ -26,11 +26,12 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
 
     for train in trains:
 
-        if train.name in maintenance_names:
-            MAINTENANCE_MEMORY[train.name] = MAINTENANCE_MEMORY.get(train.name, 0) + 1
+        # if train.name in maintenance_names:
+        #     MAINTENANCE_MEMORY[train.name] = MAINTENANCE_MEMORY.get(train.name, 0) + 1
 
         # --- Cleaning age increases for all ---
-        train.days_since_cleaning += 1
+        if train.name not in maintenance_names:
+            train.days_since_cleaning += 1
 
         # ---------------- CERTIFICATE EXPIRY COUNTDOWN ----------------
         if train.fitness_rs_expiry_days is not None:
@@ -51,18 +52,18 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
             train.fitness_telecom = False
 
         # --- Branding time passes ---
-        if train.contract_days_remaining is not None:
+        if train.contract_days_remaining is not None and train.name not in maintenance_names:
             train.contract_days_remaining -= 1
 
         # ---------------- BRANDING CONTRACT COMPLETION ----------------
-        if train.is_branded and train.contract_total_exposure is not None:
-            if train.exposure_achieved >= train.contract_total_exposure:
+        # if train.is_branded and train.contract_total_exposure is not None:
+        #     if train.exposure_achieved >= train.contract_total_exposure:
 
-                # close contract
-                train.is_branded = False
-                train.contract_total_exposure = None
-                train.contract_days_remaining = None
-                train.exposure_achieved = 0
+        #         # close contract
+        #         train.is_branded = False
+        #         train.contract_total_exposure = None
+        #         train.contract_days_remaining = None
+        #         train.exposure_achieved = 0
 
         # ---------------- NEW CONTRACT ROTATION (FLEET LEVEL) ----------------
         
@@ -94,15 +95,14 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
         elif train.name in maintenance_reason:
             reason=maintenance_reason[train.name]
 
-            days = MAINTENANCE_MEMORY.get(train.name, 1)
+            days = MAINTENANCE_MEMORY.get(train.name, 0)
 
-            base_prob = 0.2
-            queue_bonus = min(0.6, days * 0.08)
-
-            repair_prob = base_prob + queue_bonus
+            if reason == "cleaning":
+                repair_prob = min(0.95, 0.6 + days * 0.12)
+            else:
+                repair_prob = min(0.8, 0.3 + days * 0.07)
 
             if random.random() < repair_prob:
-
                 train.open_job_card = False
                 train.sensor_alert = False
 
@@ -111,7 +111,7 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
                     train.days_since_cleaning = 0
                     train.predicted_maintenance_risk = max(
                         0,
-                        train.predicted_maintenance_risk - 0.03
+                        train.predicted_maintenance_risk - 0.07
                     )
 
                 else:
@@ -140,6 +140,9 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
                 # remove from maintenance memory
                 if train.name in MAINTENANCE_MEMORY:
                     del MAINTENANCE_MEMORY[train.name]
+
+            else:
+                MAINTENANCE_MEMORY[train.name]=MAINTENANCE_MEMORY.get(train.name,0) + 1
 
         # ---------------- RARE CERTIFICATE RANDOM FAILURE ----------------
         cert_failure_prob = 0
@@ -182,6 +185,16 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
         if train.sensor_alert or not train.fitness_rs or not train.fitness_signalling or not train.fitness_telecom:
             train.open_job_card = True
 
+
+    # ---------------- BRANDING CONTRACT COMPLETION (RUN ONCE PER DAY) ----------------
+    for train in trains:
+        if train.is_branded and train.contract_total_exposure is not None:
+            if train.exposure_achieved >= train.contract_total_exposure:
+                train.is_branded = False
+                train.contract_total_exposure = None
+                train.contract_days_remaining = None
+                train.exposure_achieved = 0
+
     fleet_size = len(trains)
     max_branded = int(0.3 * fleet_size)
 
@@ -189,14 +202,14 @@ def advance_one_day(trains, service_list, standby_list, maintenance_list):
 
     if current_branded < max_branded:
 
-        if random.random() < 0.35:   # contract arrival probability
+        if random.random() < 0.25:   # contract arrival probability
 
             candidates = [t for t in trains if not t.is_branded]
 
             if candidates:
                 new_train = random.choice(candidates)
 
-                new_target = random.randint(120, 200)
+                new_target = random.randint(80, 140)
                 daily_rate = random.uniform(1.1, 1.5)
                 new_days = round(new_target / daily_rate)
 

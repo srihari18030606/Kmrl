@@ -486,11 +486,11 @@ def evaluate_trains(trains, traffic_level=3):
     # ===========================
 
     traffic_exposure_weight = {
-        1: 0.8,
-        2: 1.0,
-        3: 1.2,
-        4: 1.5,
-        5: 1.8
+        1: 1.2,
+        2: 1.5,
+        3: 1.8,
+        4: 2.1,
+        5: 2.5
     }[traffic_level]
 
     for train in final_service:
