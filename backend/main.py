@@ -6,6 +6,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 import models, schemas, crud, induction
 from database import engine, SessionLocal, Base
+from models import TrainDecisionSnapshot
 
 import copy
 
@@ -23,6 +24,7 @@ class SimulationInput(BaseModel):
 
 
 Base.metadata.create_all(bind=engine)
+SIMULATION_DAY=0
 
 # app = FastAPI()
 
@@ -65,12 +67,44 @@ def generate_induction(
     traffic_level: int = Query(3, ge=1, le=5),
     db: Session = Depends(get_db)
 ):
+    global SIMULATION_DAY
+    SIMULATION_DAY +=1
     trains = crud.get_trains(db)
 
     result = induction.evaluate_trains(
         trains,
         traffic_level=traffic_level
     )
+
+    from models import TrainDecisionSnapshot
+
+    decision_map = {}
+
+    for t in result["service"]:
+        decision_map[t["train"]] = "service"
+
+    for t in result["standby"]:
+        decision_map[t["train"]] = "standby"
+
+    for t in result["maintenance"]:
+        decision_map[t["train"]] = "maintenance"
+
+    for train in trains:
+        snapshot = TrainDecisionSnapshot(
+            train_name=train.name,
+            day_index=SIMULATION_DAY,
+            mileage=train.mileage,
+            days_since_cleaning=train.days_since_cleaning,
+            sensor_alert=train.sensor_alert,
+            open_job_card=train.open_job_card,
+            predicted_maintenance_risk=train.predicted_maintenance_risk,
+            fitness_rs=train.fitness_rs,
+            fitness_signalling=train.fitness_signalling,
+            fitness_telecom=train.fitness_telecom,
+            decision=decision_map.get(train.name, "unknown"),
+            next_day_failure=False
+        )
+        db.add(snapshot)
 
     # Create audit log entry
     log_entry = models.InductionLog(
@@ -86,6 +120,25 @@ def generate_induction(
     for train in trains:
         if train.override_status is not None:
             train.override_status = None
+
+    from simulation_engine import advance_one_day
+
+    advance_one_day(
+        trains,
+        result["service"],
+        result["standby"],
+        result["maintenance"]
+    )
+
+    latest_snapshots = db.query(TrainDecisionSnapshot).filter(
+        TrainDecisionSnapshot.day_index == SIMULATION_DAY
+    ).all()
+
+    for snap in latest_snapshots:
+        train = next(t for t in trains if t.name == snap.train_name)
+
+        if train.sensor_alert or train.open_job_card or train.mileage > 30000:
+            snap.next_day_failure = True
 
     db.commit()
 
@@ -273,54 +326,74 @@ def get_induction_logs(db: Session = Depends(get_db)):
         for log in logs
     ]
 
-import random
+@app.post("/initialize-fleet")
+def initialize_fleet(db: Session = Depends(get_db)):
 
-@app.post("/populate-database")
-def populate_database(db: Session = Depends(get_db)):
+    existing = db.query(models.Train).count()
 
-    # Clear existing trains
-    db.query(models.Train).delete()
+    if existing > 0:
+        return {"message": "Fleet already initialized"}
 
-    for i in range(1, 11):
-        is_branded=random.choice([True, False])
+    for i in range(1, 26):
 
-        if is_branded:
-            total=random.uniform(50, 150)
-            achieved=random.uniform(0, total*0.8)
-            days=random.randint(5,20)
+        # ===== CATEGORY ASSIGNMENT =====
+        if i <= 5:
+            # Fresh trains
+            mileage = 8000 + (i * 500)
+            cleaning = 1
+            risk = 0.05
+
+        elif i <= 12:
+            # Mid-life trains
+            mileage = 15000 + (i * 400)
+            cleaning = 3
+            risk = 0.10
+
+        elif i <= 18:
+            # Ageing trains
+            mileage = 24000 + (i * 300)
+            cleaning = 4
+            risk = 0.25
+
+        elif i <= 22:
+            # Dirty backlog trains
+            mileage = 18000 + (i * 350)
+            cleaning = 8
+            risk = 0.15
 
         else:
-            total=0
-            achieved=0
-            days=0
+            # Contract-critical trains
+            mileage = 20000 + (i * 200)
+            cleaning = 2
+            risk = 0.12
+
+        is_branded = (i >= 21)
+
         train = models.Train(
             name=f"T-{i}",
-            fitness_rs=random.choice([True, True, True, False]),
-            fitness_signalling=random.choice([True, True, True, False]),
-            fitness_telecom=random.choice([True, True, True, False]),
-            fitness_rs_expiry_days=random.randint(1, 30),
-            fitness_signalling_expiry_days=random.randint(1, 30),
-            fitness_telecom_expiry_days=random.randint(1, 30),
-            open_job_card=random.choice([False, False, True]),
-            days_since_cleaning=random.randint(0, 10),
-            # cleaning_completed=random.choice([True, True, False]),
+            fitness_rs=True,
+            fitness_signalling=True,
+            fitness_telecom=True,
+            fitness_rs_expiry_days=20,
+            fitness_signalling_expiry_days=20,
+            fitness_telecom_expiry_days=20,
+            open_job_card=False,
+            days_since_cleaning=cleaning,
             sensor_alert=False,
-            mileage=random.randint(1000, 35000),
-            # branding_priority=random.randint(0, 10),
-            # contract_total_exposure=random.uniform(50, 150),
-            # exposure_achieved=random.uniform(0, 40)
+            mileage=mileage,
             is_branded=is_branded,
-            contract_total_exposure=total,
-            exposure_achieved=achieved,
-            contract_days_remaining=days,
-            override_status=None
+            contract_total_exposure=140 if is_branded else 0,
+            exposure_achieved=30 if is_branded else 0,
+            contract_days_remaining=10 if is_branded else None,
+            override_status=None,
+            predicted_maintenance_risk=risk
         )
 
         db.add(train)
 
     db.commit()
 
-    return {"message": "10 sample trains created successfully"}
+    return {"message": "Permanent 25-train fleet initialized"}
 
 
 @app.get("/cleaning-plan")
@@ -522,3 +595,99 @@ def daily_report(db: Session = Depends(get_db)):
         "standby_margin_estimate": standby_margin,
         "system_status": "Stable" if high_mileage < total * 0.25 else "Attention Required"
     }
+
+@app.get("/ml-dataset-summary")
+def ml_dataset_summary(db: Session = Depends(get_db)):
+
+    total_rows = db.query(TrainDecisionSnapshot).count()
+
+    failure_rows = db.query(TrainDecisionSnapshot).filter(
+        TrainDecisionSnapshot.next_day_failure == True
+    ).count()
+
+    latest_day = db.query(TrainDecisionSnapshot.day_index)\
+        .order_by(TrainDecisionSnapshot.day_index.desc())\
+        .first()
+
+    return {
+        "total_rows": total_rows,
+        "failure_rows": failure_rows,
+        "latest_simulation_day": latest_day[0] if latest_day else None
+    }
+
+@app.get("/ml-recent-snapshots")
+def ml_recent_snapshots(limit: int = 20, db: Session = Depends(get_db)):
+
+    rows = db.query(TrainDecisionSnapshot)\
+        .order_by(TrainDecisionSnapshot.id.desc())\
+        .limit(limit)\
+        .all()
+
+    return [
+        {
+            "train": r.train_name,
+            "day": r.day_index,
+            "mileage": r.mileage,
+            "cleaning": r.days_since_cleaning,
+            "risk": r.predicted_maintenance_risk,
+            "decision": r.decision,
+            "failure": r.next_day_failure
+        }
+        for r in rows
+    ]
+
+@app.get("/ml-failure-distribution")
+def ml_failure_distribution(db: Session = Depends(get_db)):
+
+    rows = db.query(TrainDecisionSnapshot).all()
+
+    by_train = {}
+
+    for r in rows:
+        by_train.setdefault(r.train_name, 0)
+        if r.next_day_failure:
+            by_train[r.train_name] += 1
+
+    return by_train
+
+@app.get("/ml-export-dataset")
+def export_ml_dataset(db: Session = Depends(get_db)):
+
+    rows = db.query(TrainDecisionSnapshot).all()
+
+    return [
+        {
+            "mileage": r.mileage,
+            "cleaning": r.days_since_cleaning,
+            "alert": int(r.sensor_alert),
+            "job": int(r.open_job_card),
+            "risk_memory": r.predicted_maintenance_risk,
+            "rs_fit": int(r.fitness_rs),
+            "sig_fit": int(r.fitness_signalling),
+            "tel_fit": int(r.fitness_telecom),
+            "decision": r.decision,
+            "failure": int(r.next_day_failure)
+        }
+        for r in rows
+    ]
+
+@app.get("/ai-risk-preview")
+def ai_risk_preview(db: Session = Depends(get_db)):
+
+    from ai_engine import predict_failure_probability
+
+    trains = crud.get_trains(db)
+
+    output = []
+
+    for t in trains:
+        risk = predict_failure_probability(t)
+        output.append({
+            "train": t.name,
+            "mileage": t.mileage,
+            "cleaning": t.days_since_cleaning,
+            "sensor_alert": t.sensor_alert,
+            "ml_risk": round(risk, 3)
+        })
+
+    return sorted(output, key=lambda x: x["ml_risk"], reverse=True)

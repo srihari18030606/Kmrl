@@ -47,3 +47,29 @@ class InductionLog(Base):
     service_trains = Column(String)
     standby_trains = Column(String)
     maintenance_trains = Column(String)
+
+
+class TrainDecisionSnapshot(Base):
+    __tablename__ = "train_decision_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    train_name = Column(String)
+    day_index = Column(Integer)
+
+    mileage = Column(Float)
+    days_since_cleaning = Column(Integer)
+    sensor_alert = Column(Boolean)
+    open_job_card = Column(Boolean)
+
+    predicted_maintenance_risk = Column(Float)
+
+    fitness_rs = Column(Boolean)
+    fitness_signalling = Column(Boolean)
+    fitness_telecom = Column(Boolean)
+
+    decision = Column(String)  # service / standby / maintenance
+
+    next_day_failure = Column(Boolean)  # ML label
+
+    timestamp = Column(DateTime, default=datetime.utcnow)

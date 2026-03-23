@@ -1,4 +1,5 @@
 LAST_CLEANING_PLAN=[]
+from ai_engine import predict_failure_probability
 LAST_DEPOT_LAYOUT={}
 def evaluate_trains(trains, traffic_level=3):
 
@@ -220,6 +221,8 @@ def evaluate_trains(trains, traffic_level=3):
 
     eligible_map = {t.name: t for t in eligible}
 
+    all_trains_map = {t.name: t for t in trains} 
+
     if not eligible and not maintenance:
         return {
             "service": [],
@@ -280,8 +283,14 @@ def evaluate_trains(trains, traffic_level=3):
     if available_slots < 0:
         available_slots = 0
 
-    accepted_soft = soft_maintenance[:available_slots]
-    overflow_soft = soft_maintenance[available_slots:]
+    soft_maintenance_sorted = sorted(
+        soft_maintenance,
+        key=lambda m: all_trains_map[m["train"]].days_since_cleaning,
+        reverse=True
+    )
+
+    accepted_soft = soft_maintenance_sorted[:available_slots]
+    overflow_soft = soft_maintenance_sorted[available_slots:]
 
     # Only overflow cleaning trains go back to eligible pool
     overflow_names = {m["train"] for m in overflow_soft}
@@ -342,6 +351,16 @@ def evaluate_trains(trains, traffic_level=3):
 
     scored = []
 
+    traffic_weight_map = {
+        1: (0.45, 0.55),
+        2: (0.50, 0.50),
+        3: (0.55, 0.45),
+        4: (0.65, 0.35),
+        5: (0.75, 0.25)
+    }
+
+    mileage_weight, branding_weight = traffic_weight_map[traffic_level]
+
     for train in eligible:
 
         # mileage_factor = 1 - (train.mileage / max_mileage)
@@ -375,7 +394,10 @@ def evaluate_trains(trains, traffic_level=3):
         else:
             cleanliness_penalty = 0
 
-        score = (mileage_factor * 0.55) + (branding_factor * 0.45) - cleanliness_penalty
+        score = (mileage_factor * mileage_weight) + (branding_factor * branding_weight) - cleanliness_penalty
+
+        ai_risk = predict_failure_probability(train)
+        score = score * (1 - ai_risk)
 
         score=max(0,min(score,1))
 
@@ -383,7 +405,8 @@ def evaluate_trains(trains, traffic_level=3):
             "train": train.name,
             "score": round(score, 3),
             "mileage": train.mileage,
-            "branding": round(branding_urgency[train.name], 3)
+            "branding": round(branding_urgency[train.name], 3),
+            "ai_risk": round(ai_risk, 3)
         })
 
     # scored.sort(key=lambda x: x["score"], reverse=True)
@@ -520,6 +543,7 @@ def evaluate_trains(trains, traffic_level=3):
                 f"Cleared all safety checks. "
                 f"Mileage: {train['mileage']} km (maintenance risk band considered). "
                 f"Branding contract pressure influenced selection (urgency score: {train['branding']}). "
+                f"AI Predicted Failure Risk: {train['ai_risk']}. "
                 f"Composite score: {train['score']}. "
                 f"Selected for service due to highest operational suitability."
             )
