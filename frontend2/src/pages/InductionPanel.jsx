@@ -1,12 +1,11 @@
 // src/pages/InductionPanel.jsx
 import { useState } from 'react'
 import {
-  generateInduction, simulateInduction, populateDatabase,
-  resetDatabase, supervisorUpdate
+  generateInduction, supervisorUpdate
 } from '../api/api'
 import { Badge, StatusDot, Spinner, EmptyState } from '../components/ui/index'
 import {
-  Play, Zap, Database, Trash2,
+  Play,
   AlertTriangle, ChevronDown, ChevronUp, Info
 } from 'lucide-react'
 
@@ -289,22 +288,6 @@ export default function InductionPanel() {
     if (res) { setResult(res); setSimResult(null); setSimMode(false) }
   }
 
-  const handleSimulate = async () => {
-    const res = await run(simulateInduction, 'simulate', { traffic_level: traffic })
-    if (res) { setSimResult(res); setSimMode(true) }
-  }
-
-  const handlePopulate = async () => {
-    const res = await run(populateDatabase, 'populate')
-    if (res) showToast('10 sample trains created')
-  }
-
-  const handleReset = async () => {
-    if (!window.confirm('Reset all train data? This cannot be undone.')) return
-    const res = await run(resetDatabase, 'reset')
-    if (res) { setResult(null); setSimResult(null); showToast('Database reset') }
-  }
-
   const display = simMode ? simResult : result
 
   return (
@@ -336,23 +319,6 @@ export default function InductionPanel() {
           <button onClick={handleGenerate} disabled={!!loading} className="btn btn-primary">
             {loading === 'generate' ? <Spinner size={12} /> : <Play size={12} />}
             Generate Induction
-          </button>
-
-          <button onClick={handleSimulate} disabled={!!loading} className="btn btn-ghost">
-            {loading === 'simulate' ? <Spinner size={12} /> : <Zap size={12} />}
-            Simulate
-          </button>
-
-          <div className="h-6 w-px bg-depot-border mx-1" />
-
-          <button onClick={handlePopulate} disabled={!!loading} className="btn btn-ghost">
-            {loading === 'populate' ? <Spinner size={12} /> : <Database size={12} />}
-            Populate Sample Data
-          </button>
-
-          <button onClick={handleReset} disabled={!!loading} className="btn btn-danger">
-            {loading === 'reset' ? <Spinner size={12} /> : <Trash2 size={12} />}
-            Reset DB
           </button>
 
           <button onClick={() => setShowOverride(true)} className="btn btn-warning">

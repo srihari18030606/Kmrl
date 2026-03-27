@@ -616,6 +616,8 @@ def evaluate_trains(trains, traffic_level=3):
 
 def decision_breakdown(train):
 
+    from ai_engine import predict_failure_probability
+
     SAFE_ZONE = 20000
     CAUTION_ZONE = 26000
     CRITICAL_ZONE = 29000
@@ -644,8 +646,11 @@ def decision_breakdown(train):
 
     branding_flag = train.is_branded
 
+    ai_risk = round(predict_failure_probability(train), 3)
+
     return {
         "mileage_factor": mileage_factor,
         "cleanliness_penalty": cleanliness_penalty,
-        "branding_active": branding_flag
+        "branding_active": branding_flag,
+        "ai_risk": ai_risk
     }
