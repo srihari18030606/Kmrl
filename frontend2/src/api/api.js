@@ -1,7 +1,7 @@
 // src/api/api.js
 // Central API service layer — all calls to FastAPI backend
 
-const BASE = '/api'
+const BASE = 'https://kmrl-api.onrender.com'
 
 async function request(method, path, body = null, isFormData = false) {
   const opts = {
