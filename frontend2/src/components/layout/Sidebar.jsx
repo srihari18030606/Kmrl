@@ -90,94 +90,166 @@
 //   )
 // }
 
-// src/components/layout/Sidebar.jsx
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Map, Droplets, Tag,
-  Bell, History, BarChart2, Brain, ChevronRight, DatabaseZap
+  Bell, History, BarChart2, Brain, ChevronRight, DatabaseZap, Users, ClipboardCheck, Shield
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/',               icon: LayoutDashboard, label: 'Induction Panel',      sub: 'Main Control' },
-  { to: '/depot',          icon: Map,             label: 'Depot Layout',         sub: 'Track Geometry' },
-  { to: '/cleaning',       icon: Droplets,        label: 'Cleaning Mgmt',        sub: 'Hygiene Status' },
-  { to: '/branding',       icon: Tag,             label: 'Branding Exposure',    sub: 'Contract KPIs' },
-  { to: '/alerts',         icon: Bell,            label: 'Alerts & Fleet Health',sub: 'KPI Monitor' },
-  { to: '/history',        icon: History,         label: 'Induction History',    sub: 'Audit Logs' },
-  { to: '/resources',      icon: BarChart2,       label: 'Resource Utilisation', sub: 'Bay & Track Load' },
-  { to: '/explainability', icon: Brain,           label: 'Decision Explainability', sub: 'Score Breakdown' },
+  { to: '/', icon: LayoutDashboard, label: 'Induction Panel', sub: 'Main Control' },
+  { to: '/depot', icon: Map, label: 'Depot Layout', sub: 'Track Geometry' },
+  { to: '/cleaning', icon: Droplets, label: 'Cleaning Mgmt', sub: 'Hygiene Status' },
+  { to: '/branding', icon: Tag, label: 'Branding Exposure', sub: 'Contract KPIs' },
+  { to: '/alerts', icon: Bell, label: 'Alerts & Fleet Health', sub: 'KPI Monitor' },
+  { to: '/history', icon: History, label: 'Induction History', sub: 'Audit Logs' },
+  { to: '/resources', icon: BarChart2, label: 'Resource Utilisation', sub: 'Bay & Track Load' },
+  { to: '/explainability', icon: Brain, label: 'Decision Explainability', sub: 'Score Breakdown' },
   { to: '/updates', icon: DatabaseZap, label: 'Data Updates', sub: 'Maximo · IoT · Cleaning' },
+  {to: '/users', icon: Users, label: 'User Management', sub: 'Roles & Access'},
+  {to: '/approvals', icon: ClipboardCheck, label: 'AI Approvals', sub: 'Human Review'},
+  {to: '/security', icon: Shield, label: 'Security Center', sub: 'Access Monitoring'}
 ]
 
+const PERMISSIONS = {
+  admin: ['*'],
+
+  operations: [
+    '/',
+    '/depot',
+    '/cleaning',
+    '/alerts',
+    '/history',
+    '/resources',
+    '/explainability',
+    '/approvals'
+  ],
+
+  maintenance: [
+    '/alerts',
+    '/resources',
+    '/explainability'
+  ],
+
+  cleaning: [
+    '/cleaning',
+    '/alerts'
+  ],
+
+  commercial: [
+    '/branding',
+    '/updates'
+  ]
+}
+
 export default function Sidebar() {
+  const { role } = useAuth()
+
   return (
     <aside
-  className="fixed left-0 top-0 h-screen w-64 flex flex-col z-40"
-  style={{
-    background: '#0d1117',
-    borderRight: '1px solid #1c2535',
-  }}
->
-      {/* Header */}
+      className="fixed left-0 top-0 h-screen w-64 flex flex-col z-40"
+      style={{
+        background: '#0d1117',
+        borderRight: '1px solid #1c2535',
+      }}
+    >
       <div className="px-5 py-6" style={{ borderBottom: '1px solid #1c2535' }}>
-  <div className="flex items-center gap-2 mb-1">
-    <div className="w-2.5 h-2.5 rounded-full pulse-green" style={{ background: '#00e676' }} />
-    <span className="font-display font-bold text-sm tracking-widest uppercase" style={{ color: '#00c2ff' }}>
-      KMRL
-    </span>
-  </div>
-  <div className="font-display font-bold text-xl leading-tight tracking-wide" style={{ color: '#f0f6fc' }}>
-    Fleet Induction
-  </div>
-  <div className="font-display text-sm tracking-wide mt-0.5" style={{ color: '#64748b' }}>
-    Decision Support System
-  </div>
-</div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2.5 h-2.5 rounded-full pulse-green" style={{ background: '#00e676' }} />
+          <span className="font-display font-bold text-sm tracking-widest uppercase" style={{ color: '#00c2ff' }}>
+            KMRL
+          </span>
+        </div>
 
-      {/* Nav label */}
+        <div
+          className="font-display font-bold text-xl leading-tight tracking-wide"
+          style={{ color: '#f0f6fc' }}
+        >
+          Fleet Induction
+        </div>
+
+        <div
+          className="font-display text-sm tracking-wide mt-0.5"
+          style={{ color: '#64748b' }}
+        >
+          Decision Support System
+        </div>
+      </div>
+
       <div className="px-5 pt-5 pb-2">
-  <span className="font-display text-xs tracking-widest uppercase" style={{ color: '#475569' }}>Navigation</span>
-</div>
+        <span
+          className="font-display text-xs tracking-widest uppercase"
+          style={{ color: '#475569' }}
+        >
+          Navigation
+        </span>
+      </div>
 
-      {/* Links */}
       <nav className="flex-1 overflow-y-auto px-3 pb-4">
-        {NAV.map(({ to, icon: Icon, label, sub }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-  `group flex items-center gap-4 px-4 py-3.5 rounded-md mb-1 transition-all duration-150 border-l-2 ${
-    isActive
-      ? 'border-l-2'
-      : 'border-transparent'
-  }`
-}
-style={({ isActive }) => ({
-  background: isActive ? '#243044' : 'transparent',
-  borderLeftColor: isActive ? '#00c2ff' : 'transparent',
-})}
-          >
-            {({ isActive }) => (
-              <>
-                <Icon
-                  size={20}
-                  className={isActive ? 'text-depot-accent' : 'text-depot-muted group-hover:text-depot-text'}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-display font-semibold text-sm leading-tight tracking-wide"
-  style={{ color: isActive ? '#f0f6fc' : '#94a3b8' }}>
-  {label}
-</div>
-<div className="text-xs leading-tight mt-0.5" style={{ color: '#475569' }}>{sub}</div>
-                </div>
-                {isActive && <ChevronRight size={14} style={{ color: '#00c2ff' }} className="flex-shrink-0" />}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+        {NAV
+          .filter(item =>
+            role === 'admin' ||
+            PERMISSIONS[role]?.includes(item.to)
+          )
+          .map(({ to, icon: Icon, label, sub }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `group flex items-center gap-4 px-4 py-3.5 rounded-md mb-1 transition-all duration-150 border-l-2 ${
+                  isActive
+                    ? 'border-l-2'
+                    : 'border-transparent'
+                }`
+              }
+              style={({ isActive }) => ({
+                background: isActive ? '#243044' : 'transparent',
+                borderLeftColor: isActive ? '#00c2ff' : 'transparent',
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    size={20}
+                    className={
+                      isActive
+                        ? 'text-depot-accent'
+                        : 'text-depot-muted group-hover:text-depot-text'
+                    }
+                  />
 
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="font-display font-semibold text-sm leading-tight tracking-wide"
+                      style={{
+                        color: isActive ? '#f0f6fc' : '#94a3b8'
+                      }}
+                    >
+                      {label}
+                    </div>
+
+                    <div
+                      className="text-xs leading-tight mt-0.5"
+                      style={{ color: '#475569' }}
+                    >
+                      {sub}
+                    </div>
+                  </div>
+
+                  {isActive && (
+                    <ChevronRight
+                      size={14}
+                      style={{ color: '#00c2ff' }}
+                      className="flex-shrink-0"
+                    />
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+      </nav>
     </aside>
   )
 }

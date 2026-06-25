@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Activity, Moon, Sun } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
+import { useAuth } from '../../context/AuthContext'
 
 const PAGE_TITLES = {
   '/':               { title: 'Induction Control Panel',      sub: 'Nightly fleet induction decision system' },
@@ -19,6 +20,7 @@ export default function TopBar() {
   const { pathname } = useLocation()
   const { theme, toggle } = useTheme()
   const [time, setTime] = useState(new Date())
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
@@ -53,38 +55,80 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Right: status + theme toggle + clock */}
-      <div className="flex items-center gap-5">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Activity size={12} style={{ color: 'var(--depot-green)' }} />
-          <span style={{ color: 'var(--depot-green)' }}>SYSTEM ONLINE</span>
-        </div>
+      {/* Right: status + user + theme toggle + clock */}
+<div className="flex items-center gap-5">
+  <div className="flex items-center gap-2 text-xs font-mono">
+    <Activity size={12} style={{ color: 'var(--depot-green)' }} />
+    <span style={{ color: 'var(--depot-green)' }}>SYSTEM ONLINE</span>
+  </div>
 
-        {/* Theme toggle button */}
-        <button
-          onClick={toggle}
-          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-          className="flex items-center justify-center w-8 h-8 rounded-sm border transition-all duration-200 hover:scale-110"
-          style={{
-            borderColor: 'var(--depot-border)',
-            background: 'var(--depot-dim)',
-            color: theme === 'dark' ? '#ffd740' : '#0284c7',
-          }}
-        >
-          {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
-        </button>
-
-        <div className="text-right">
-          <div className="font-mono text-sm font-bold glow-accent"
-            style={{ color: 'var(--depot-accent)' }}>
-            {timeStr}
-          </div>
-          <div className="font-mono text-2xs"
-            style={{ color: 'var(--depot-muted)' }}>
-            {dateStr}
-          </div>
-        </div>
+  {/* User Info */}
+  <div
+    className="flex items-center gap-3 px-3 py-1 rounded-sm border"
+    style={{
+      borderColor: 'var(--depot-border)',
+      background: 'var(--depot-dim)',
+    }}
+  >
+    <div>
+      <div
+        className="font-mono text-xs font-bold"
+        style={{ color: 'var(--depot-white)' }}
+      >
+        {user?.id}
       </div>
+
+      <div
+        className="text-xs"
+        style={{ color: 'var(--depot-muted)' }}
+      >
+        {user?.role}
+      </div>
+    </div>
+
+    <button
+      onClick={logout}
+      className="btn btn-danger"
+      style={{
+        padding: '4px 8px',
+        fontSize: '10px',
+      }}
+    >
+      Logout
+    </button>
+  </div>
+
+  {/* Theme Toggle */}
+  <button
+    onClick={toggle}
+    title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+    className="flex items-center justify-center w-8 h-8 rounded-sm border transition-all duration-200 hover:scale-110"
+    style={{
+      borderColor: 'var(--depot-border)',
+      background: 'var(--depot-dim)',
+      color: theme === 'dark' ? '#ffd740' : '#0284c7',
+    }}
+  >
+    {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
+  </button>
+
+  {/* Clock */}
+  <div className="text-right">
+    <div
+      className="font-mono text-sm font-bold glow-accent"
+      style={{ color: 'var(--depot-accent)' }}
+    >
+      {timeStr}
+    </div>
+
+    <div
+      className="font-mono text-2xs"
+      style={{ color: 'var(--depot-muted)' }}
+    >
+      {dateStr}
+    </div>
+  </div>
+</div>
     </header>
   )
 }

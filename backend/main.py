@@ -40,6 +40,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def home():
+    return {
+        "message": "KMRL TransitIQ Backend Running"
+    }
+
 def get_db():
     db = SessionLocal()
     try:
