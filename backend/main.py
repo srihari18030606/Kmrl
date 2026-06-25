@@ -1,7 +1,8 @@
 # from turtle import update
 
 # from xgboost import train
-
+import json
+from pathlib import Path
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 import models, schemas, crud, induction
@@ -697,3 +698,23 @@ def ai_risk_preview(db: Session = Depends(get_db)):
         })
 
     return sorted(output, key=lambda x: x["ml_risk"], reverse=True)
+
+@app.post("/seed-database")
+def seed_database(db: Session = Depends(get_db)):
+
+    if db.query(models.Train).count() > 0:
+        return {"message": "Database already contains data."}
+
+    seed_file = Path("train_seed.json")
+
+    with open(seed_file, "r") as f:
+        trains = json.load(f)
+
+    for train in trains:
+        db.add(models.Train(**train))
+
+    db.commit()
+
+    return {
+        "message": f"Successfully inserted {len(trains)} trains."
+    }
