@@ -330,33 +330,42 @@ Based on these parameters, the AI classifies trains into:
 
 ## Login Page
 
-(Add Screenshot Here)
+The login page provides secure role-based authentication for administrators, operations, maintenance, cleaning, and commercial users. It features a modern glassmorphism interface with a KMRL-themed background.
+
+![Login Page](screenshots/login.png)
 
 ---
 
 ## Fleet Induction Dashboard
 
-(Add Screenshot Here)
+The Fleet Induction Dashboard displays AI-generated train allocation decisions based on operational constraints, predictive maintenance, fitness status, IoT alerts, cleaning status, and branding requirements.
+
+![Fleet Induction Dashboard](screenshots/induction-dashboard.png)
 
 ---
 
 ## Depot Layout
 
-(Add Screenshot Here)
+The Depot Layout provides a real-time visualization of train positions, maintenance bays, standby tracks, and service allocations, enabling efficient depot operations and fleet monitoring.
+
+![Depot Layout](screenshots/depot-layout.png)
 
 ---
 
 ## AI Approval Dashboard
 
-(Add Screenshot Here)
+The AI Approval Dashboard allows authorized personnel to review AI-generated recommendations before deployment. Users can approve, reject, or override decisions while maintaining a complete audit trail.
+
+![AI Approval Dashboard](screenshots/ai-approvals.png)
 
 ---
 
 ## Security Center
 
-(Add Screenshot Here)
+The Security Center monitors authentication events, user activities, approval logs, failed login attempts, and other system events, providing administrators with comprehensive security auditing capabilities.
 
----
+![Security Center](screenshots/security-center.png)
+
 
 # 🔒 Security Features
 
@@ -416,7 +425,7 @@ This project has been developed for educational and research purposes as part of
 
 **Srihari**
 
-B.Tech – Internet of Things (IoT)
+B.E – COMPUTER SCIENCE AND ENGINEERING
 
 Final Year Engineering Student
 
