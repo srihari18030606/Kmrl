@@ -1,20 +1,22 @@
 # 🚇 KMRL Fleet Induction Decision Support System (DSS)
 
-An AI-powered Decision Support System for **Kochi Metro Rail Limited (KMRL)** that automates fleet induction planning using Machine Learning, predictive maintenance, real-time operational data, branding constraints, and business rules.
+> **Hybrid AI-Powered Decision Support System for Intelligent Metro Fleet Induction Planning**
+
+An AI-powered Decision Support System for **Kochi Metro Rail Limited (KMRL)** that automates fleet induction planning using Machine Learning, predictive maintenance, operational business rules, IoT alerts, branding constraints, maintenance scheduling, and supervisor approvals.
 
 ---
 
-## 🌐 Live Demo
+# 🌐 Live Demo
 
-### Frontend (Vercel)
+## Frontend (Vercel)
 
 https://kmrl-theta.vercel.app
 
-### Backend API (Render)
+## Backend API (Render)
 
 https://kmrl-api.onrender.com
 
-### Swagger Documentation
+## Swagger Documentation
 
 https://kmrl-api.onrender.com/docs
 
@@ -22,15 +24,15 @@ https://kmrl-api.onrender.com/docs
 
 # 📖 Project Overview
 
-The **KMRL Fleet Induction Decision Support System (DSS)** is an intelligent web application designed to assist metro depot controllers in selecting the most suitable trains for daily passenger service.
+The **KMRL Fleet Induction Decision Support System (DSS)** is a Hybrid AI-based web application developed to assist metro depot controllers in making accurate and efficient fleet induction decisions.
 
-Instead of manually evaluating every train, the AI engine automatically analyzes operational parameters and recommends whether a train should be allocated for:
+The system analyzes operational and maintenance data stored in the database and combines Machine Learning with operational business rules to recommend the most suitable trains for:
 
 - ✅ Passenger Service
 - 🟡 Standby
 - 🔴 Maintenance
 
-The system combines predictive analytics, operational rules, IoT alerts, branding commitments, maintenance schedules, and supervisor overrides to improve operational efficiency while ensuring safety and compliance.
+It also provides role-based authentication, AI approval workflows, security auditing, explainable AI, depot visualization, branding monitoring, predictive maintenance, and operational dashboards.
 
 ---
 
@@ -38,7 +40,7 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 
 ## 🚇 Fleet Management
 
-- AI-based Fleet Induction Planning
+- AI Fleet Induction Planning
 - Depot Layout Visualization
 - Resource Utilization Dashboard
 - Daily Operational Reports
@@ -46,13 +48,14 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 ## 🤖 Artificial Intelligence
 
 - Predictive Maintenance Risk Analysis
-- AI Decision Explainability
+- AI Decision Explainability Dashboard
 - AI Approval Workflow
-- Human Override Support
+- Supervisor Override Support
+- Hybrid Rule-Based Decision Engine
 
 ## 📡 Smart Monitoring
 
-- IoT Sensor Alert Monitoring
+- IoT Sensor Monitoring
 - Cleaning Management
 - Branding Exposure Tracking
 - Maintenance Scheduling
@@ -60,15 +63,18 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 ## 🔐 Security
 
 - Role-Based Authentication
-- Security Center
-- Audit Logs
+- Secure Login System
+- Security Center Dashboard
+- Authentication Logs
 - User Activity Monitoring
+- Role-Based Navigation
 
 ## 📊 Analytics
 
 - Fleet Health Dashboard
 - Induction History
 - KPI Monitoring
+- AI Decision History
 - Decision Breakdown
 
 ## 📂 Data Management
@@ -89,7 +95,8 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 - Vite
 - JavaScript
 - Tailwind CSS
-- Lucide Icons
+- React Context API
+- Lucide React Icons
 
 ## Backend
 
@@ -97,17 +104,19 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 - SQLAlchemy
 - SQLite
 - Pydantic
+- REST API
 
 ## AI / Machine Learning
 
 - Scikit-Learn
 - NumPy
 - Joblib
+- Hybrid Rule-Based AI Engine
 
 ## Deployment
 
-- Vercel (Frontend)
-- Render (Backend)
+- Vercel
+- Render
 
 ## Version Control
 
@@ -118,55 +127,35 @@ The system combines predictive analytics, operational rules, IoT alerts, brandin
 
 # 🏗️ System Architecture
 
-```
-                   React Frontend
-                       │
-                       │ REST API
-                       ▼
-                FastAPI Backend
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-        ▼              ▼              ▼
-  SQLite Database   AI Engine    Business Rules
-        │              │              │
-        └──────────────┼──────────────┘
-                       ▼
-              Fleet Induction Decision
+```text
+React Frontend
+      │
+ REST API
+      ▼
+FastAPI Backend
+      │
+ ┌────┼────┐
+ │    │    │
+ ▼    ▼    ▼
+SQLite AI Engine Business Rules
+      │
+      ▼
+Hybrid AI Decision Engine
+      │
+      ▼
+Fleet Induction Recommendation
 ```
 
 ---
 
 # 📂 Project Structure
 
-```
+```text
 Kmrl
-│
 ├── backend
-│   ├── ai_models
-│   ├── database.py
-│   ├── models.py
-│   ├── schemas.py
-│   ├── crud.py
-│   ├── induction.py
-│   ├── simulation_engine.py
-│   ├── ai_engine.py
-│   ├── main.py
-│   ├── requirements.txt
-│   └── kmrl.db
-│
 ├── frontend2
-│   ├── src
-│   │   ├── components
-│   │   ├── context
-│   │   ├── pages
-│   │   ├── api
-│   │   ├── assets
-│   │   └── App.jsx
-│   └── package.json
-│
 ├── ml
-│
+├── screenshots
 └── README.md
 ```
 
@@ -174,105 +163,57 @@ Kmrl
 
 # 🚀 Running the Project Locally
 
-## 1️⃣ Clone the Repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/srihari18030606/Kmrl.git
 cd Kmrl
 ```
 
----
-
-## 2️⃣ Backend Setup
-
-Open Terminal
+## Backend
 
 ```bash
 cd backend
-```
-
-Install Dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
-Run FastAPI
-
-```bash
 uvicorn main:app --reload
 ```
 
-Backend URL
-
-```
+Backend:
 http://127.0.0.1:8000
-```
 
-Swagger Documentation
-
-```
+Swagger:
 http://127.0.0.1:8000/docs
-```
 
----
-
-## 3️⃣ Frontend Setup
-
-Open another terminal
+## Frontend
 
 ```bash
 cd frontend2
-```
-
-Install Dependencies
-
-```bash
 npm install
-```
-
-Run React
-
-```bash
 npm run dev
 ```
 
-Frontend URL
-
-```
+Frontend:
 http://localhost:5173
-```
-
----
-
-# 👤 Demo Login Credentials
-
-| Role | Employee ID | Password |
-|------|-------------|----------|
-| Administrator | ADMIN001 | admin123 |
-| Operations | OPS001 | ops123 |
-| Maintenance | MAINT001 | maint123 |
-| Cleaning | CLEAN001 | clean123 |
-| Commercial | COMM001 | comm123 |
 
 ---
 
 # 🤖 AI Decision Logic
 
-The AI engine evaluates each train using:
+The Hybrid AI Decision Engine evaluates:
 
-- Fitness Certificate Status
+- Train Fitness
 - Predictive Maintenance Risk
 - Maintenance Job Cards
 - Cleaning Status
-- IoT Sensor Alerts
+- IoT Alerts
 - Branding Exposure
 - Supervisor Overrides
 - Mileage
 - Maintenance Expiry
 - Depot Constraints
+- Security Rules
 
-Based on these parameters, the AI classifies trains into:
+The system recommends:
 
 - Service
 - Standby
@@ -280,49 +221,31 @@ Based on these parameters, the AI classifies trains into:
 
 ---
 
+# 💾 Database
+
+The application currently uses **SQLite** through SQLAlchemy ORM.
+
+Stored data includes:
+
+- Train Information
+- Fleet Induction History
+- AI Decision Snapshots
+- Security Logs
+- User Activity Logs
+
+Demo deployments can be initialized using the **/seed-database** endpoint.
+
+---
+
 # 👥 User Roles
 
-### Administrator
+- Administrator
+- Operations
+- Maintenance
+- Cleaning
+- Commercial
 
-- Complete System Access
-- Security Center
-- User Management
-- AI Approval Monitoring
-- Audit Logs
-
----
-
-### Operations
-
-- Fleet Induction
-- Depot Layout
-- Resource Utilization
-- AI Approvals
-- Decision Explainability
-
----
-
-### Maintenance
-
-- Fleet Health
-- Maintenance Dashboard
-- Predictive Maintenance
-- Alerts
-
----
-
-### Cleaning
-
-- Cleaning Management
-- Cleaning Updates
-
----
-
-### Commercial
-
-- Branding Dashboard
-- CSV Upload
-- Contract Monitoring
+Each role has dedicated dashboards and permissions.
 
 ---
 
@@ -330,104 +253,89 @@ Based on these parameters, the AI classifies trains into:
 
 ## Login Page
 
-The login page provides secure role-based authentication for administrators, operations, maintenance, cleaning, and commercial users. It features a modern glassmorphism interface with a KMRL-themed background.
-
-![Login Page](screenshots/login.png)
-
----
+![Login](screenshots/login.png)
 
 ## Fleet Induction Dashboard
 
-The Fleet Induction Dashboard displays AI-generated train allocation decisions based on operational constraints, predictive maintenance, fitness status, IoT alerts, cleaning status, and branding requirements.
-
-![Fleet Induction Dashboard](screenshots/induction-dashboard.png)
-
----
+![Dashboard](screenshots/induction-dashboard.png)
 
 ## Depot Layout
 
-The Depot Layout provides a real-time visualization of train positions, maintenance bays, standby tracks, and service allocations, enabling efficient depot operations and fleet monitoring.
-
-![Depot Layout](screenshots/depot-layout.png)
-
----
+![Depot](screenshots/depot-layout.png)
 
 ## AI Approval Dashboard
 
-The AI Approval Dashboard allows authorized personnel to review AI-generated recommendations before deployment. Users can approve, reject, or override decisions while maintaining a complete audit trail.
-
-![AI Approval Dashboard](screenshots/ai-approvals.png)
-
----
+![AI Approvals](screenshots/ai-approvals.png)
 
 ## Security Center
 
-The Security Center monitors authentication events, user activities, approval logs, failed login attempts, and other system events, providing administrators with comprehensive security auditing capabilities.
+![Security](screenshots/security-center.png)
 
-![Security Center](screenshots/security-center.png)
-
+---
 
 # 🔒 Security Features
 
 - Role-Based Access Control
 - Authentication Logging
 - Security Event Monitoring
-- User Activity Tracking
-- AI Approval Auditing
+- AI Approval Logging
+- Supervisor Action Logging
+- Admin-only Security Dashboard
 
 ---
 
 # 📈 Future Enhancements
 
-- Real-time MQTT IoT Integration
-- Live GPS Train Tracking
-- Multi Depot Support
+- PostgreSQL Migration
+- MQTT IoT Integration
+- Live GPS Tracking
 - Mobile Application
-- Predictive Delay Analysis
-- Cloud Database (PostgreSQL)
-- Notification System
-- AI Chat Assistant
+- WebSocket Real-Time Updates
+- Multi Depot Support
+- Email Notifications
+- Cloud Authentication
 - Digital Twin Visualization
+
+---
+
+# ⚠ Known Limitations
+
+- Demo authentication uses predefined users.
+- SQLite is used for demonstration deployment.
+- IoT data is simulated.
+- GPS integration is not implemented.
 
 ---
 
 # 🌐 Deployment
 
-## Frontend
+Frontend: **Vercel**
 
-Hosted on
+Backend: **Render**
 
-**Vercel**
-
----
-
-## Backend
-
-Hosted on
-
-**Render**
-
----
-
-## Database
-
-SQLite
+Database: **SQLite** (Future: PostgreSQL)
 
 ---
 
 # 📜 License
 
-This project has been developed for educational and research purposes as part of a Final Year Engineering Project.
+Developed for educational and research purposes as a Final Year Engineering Project.
 
 ---
 
-# 👨‍💻 Author
+# 👨‍💻 Contributors
 
-**Srihari**
+**Srihari S**
 
-B.E – COMPUTER SCIENCE AND ENGINEERING
+B.E. Computer Science and Engineering
 
-Final Year Engineering Student
+**Siddhanth T.A**
+
+B.E. Computer Science and Engineering
+
+**Varsha S**
+
+B.E. Computer Science and Engineering
 
 ---
 
@@ -444,4 +352,4 @@ Final Year Engineering Student
 
 ---
 
-## ⭐ If you found this project useful, don't forget to star the repository!
+⭐ If you found this project useful, consider giving the repository a star.
